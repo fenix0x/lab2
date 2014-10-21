@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 	if (argc < 3) 
 	{
 		printf("USAGE: findtext.exe <file name> <text to search>\n");
-		return 1;
+		return 0;
 	}
 
 	char* filename = argv[1];

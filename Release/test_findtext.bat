@@ -1,10 +1,10 @@
-echo off
+@echo off
 REM запуск программы без параметров
 findtext.exe 
-IF NOT ERRORLEVEL 1 GOTO err
+IF NOT ERRORLEVEL 0 GOTO err
 REM запуск программы с 1 параметром
 findtext.exe readme.txt
-IF NOT ERRORLEVEL 1 GOTO err
+IF NOT ERRORLEVEL 0 GOTO err
 REM запуск программы с неверным файлом
 findtext.exe readme.tx version
 IF NOT ERRORLEVEL 1 GOTO err
