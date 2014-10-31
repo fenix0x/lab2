@@ -4,8 +4,11 @@
 #include <cstring>
 using namespace std;
 
-const int MAX_SIZE = 2*1024*1024;
-const int BUF_SIZE = 1024;
+const unsigned long MAX_SIZE = 2 * 1073741824 - 1; // 2Gb
+const long BUF_SIZE = 1024;
+
+const int ERR_MAX_SIZE = 1;
+const int ERR_ZERO_LENGTH_FILE = 2;
 
 void printUsage() 
 {
@@ -13,9 +16,10 @@ void printUsage()
 	printf("       rle.exe unpack <input file> <output file> \n");
 }
 
-void packFile(ifstream& fileIn, ofstream& fileOut)
+int packFile(ifstream& fileIn, ofstream& fileOut)
 {
 	char* bufferOut = new char[2];
+	unsigned long totalSize = 0;
 	if (!fileIn.eof())
 	{
 		char newChar = fileIn.get();
@@ -32,42 +36,65 @@ void packFile(ifstream& fileIn, ofstream& fileOut)
 			}
 			bufferOut[0] = charCount;
 			bufferOut[1] = oldChar;
-			fileOut.write(bufferOut, 2 * sizeof(char));
+			unsigned int incSize = 2 * sizeof(char);
+			totalSize += incSize;
+			if (totalSize > MAX_SIZE)
+			{
+				return ERR_MAX_SIZE;
+			} else
+			{
+				fileOut.write(bufferOut, incSize);
+			}
 		}
 		delete[] bufferOut;
 	}
+	if (totalSize == 0)
+	{
+		return ERR_ZERO_LENGTH_FILE;
+	}
+	return 0;
 }
 
-void unpackChars(char* & bufferIn, int bufferInSize, ofstream& fileOut)
+int unpackChars(char* & bufferIn, int bufferInSize, ofstream& fileOut, unsigned long& totalBufferOutSize)
 {
 	char* bufferOut = new char[BUF_SIZE];
 	for (int i = 0; i < bufferInSize; i += 2)
 	{
-		int bufferOutSize = 0;
+		unsigned long bufferOutSize = 0;
 		unsigned char countChars = bufferIn[i];
 		char newChar = bufferIn[i + 1];
 		for (unsigned char j = 0; j < countChars; ++j)
 		{
 			bufferOut[bufferOutSize++] = newChar;
 		}
+		totalBufferOutSize += bufferOutSize;
+		if (totalBufferOutSize > MAX_SIZE)
+		{
+			return ERR_MAX_SIZE;
+		}
 		fileOut.write(bufferOut, bufferOutSize);
 	}
+	return 0;
 }
 
-void unpackFile(ifstream& fileIn, ofstream& fileOut)
+int unpackFile(ifstream& fileIn, ofstream& fileOut)
 {
+	unsigned long totalSize = 0;
 	while (!fileIn.eof())
 	{
 		char* bufferIn = new char[BUF_SIZE];
+		int err = 0;
 		while (fileIn.read(bufferIn, BUF_SIZE))
 		{
-			unpackChars(bufferIn, BUF_SIZE, fileOut);
+			err = unpackChars(bufferIn, BUF_SIZE, fileOut, totalSize);
+			if (err != 0) return err;
 		}
-
-		unpackChars(bufferIn, fileIn.gcount(), fileOut);
-
+		err = unpackChars(bufferIn, fileIn.gcount(), fileOut, totalSize);
 		delete[] bufferIn;
+		if (err != 0)
+			return err;
 	}
+	return 0;
 }
 
 int main(int argc, char* argv[])
@@ -104,22 +131,31 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	printf("[%s]\n", command);
+	int err = 0;
 	if (strcmp(command, "pack")==0)
 	{
-		printf("pack file\n");
-		packFile(fIn, fOut);
+		err = packFile(fIn, fOut);
 	}
 	else
 	{
-		printf("unpack file\n");
-		unpackFile(fIn, fOut);
+		err = unpackFile(fIn, fOut);
 	}
 
 	fOut.close();
 	fIn.close();
 
-	printf("File %s %sed into %s succesfuly.\n", inputFilename, command, outputFilename);
+	switch (err)
+	{
+	case ERR_MAX_SIZE:
+		printf("Output file %s max size reached. Aborting job.\n", outputFilename);
+		return 1;
+	case ERR_ZERO_LENGTH_FILE:
+		printf("Warning! Intput file %s is empty.\n", inputFilename);
+		break;
+	default:
+		printf("File %s %sed into %s succesfuly.\n", inputFilename, command, outputFilename);
+		break;
+	}
 
 	return 0;
 }
