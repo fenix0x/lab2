@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flipbyte", "flipbyte\flipby
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "multmatrix", "multmatrix\multmatrix.vcxproj", "{47A3881B-F204-41B8-9C66-4A505D4428CE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rle", "ConsoleApplication1\ConsoleApplication1.vcxproj", "{63FD334D-0838-4999-8B08-944289BC8400}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rle", "rle\rle.vcxproj", "{A5DECD4D-CAD2-4AC6-A59D-BC735F948463}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{47A3881B-F204-41B8-9C66-4A505D4428CE}.Debug|Win32.Build.0 = Debug|Win32
 		{47A3881B-F204-41B8-9C66-4A505D4428CE}.Release|Win32.ActiveCfg = Release|Win32
 		{47A3881B-F204-41B8-9C66-4A505D4428CE}.Release|Win32.Build.0 = Release|Win32
-		{63FD334D-0838-4999-8B08-944289BC8400}.Debug|Win32.ActiveCfg = Debug|Win32
-		{63FD334D-0838-4999-8B08-944289BC8400}.Debug|Win32.Build.0 = Debug|Win32
-		{63FD334D-0838-4999-8B08-944289BC8400}.Release|Win32.ActiveCfg = Release|Win32
-		{63FD334D-0838-4999-8B08-944289BC8400}.Release|Win32.Build.0 = Release|Win32
+		{A5DECD4D-CAD2-4AC6-A59D-BC735F948463}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A5DECD4D-CAD2-4AC6-A59D-BC735F948463}.Debug|Win32.Build.0 = Debug|Win32
+		{A5DECD4D-CAD2-4AC6-A59D-BC735F948463}.Release|Win32.ActiveCfg = Release|Win32
+		{A5DECD4D-CAD2-4AC6-A59D-BC735F948463}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
