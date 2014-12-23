@@ -10,8 +10,7 @@ enum Err
 	ERR_CANT_OPEN_FILE,
 };
 
-
-bool findLines(const char* filename, const char* textToSearch, Err & err)
+bool FindLines(const char* filename, const char* textToSearch, Err & err)
 {
 	bool found = false;
 	ifstream inputFile(filename);
@@ -50,7 +49,7 @@ int main(int argc, char* argv[])
 	Err err = ERR_NO_ERROR;
 
 	// try to find lines with string argv[2] in file argv[1]
-	bool found = findLines(argv[1], argv[2], err);
+	bool found = FindLines(argv[1], argv[2], err);
 	
 	if (err == ERR_NO_ERROR)
 	{

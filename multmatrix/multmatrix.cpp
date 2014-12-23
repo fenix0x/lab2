@@ -10,31 +10,28 @@ typedef const double ConstMatrix3x3[3][3];
 
 bool LoadMatrix(const char* filename, Matrix3x3 matrix)
 {
-	bool err = false;
 	ifstream inputFile(filename);
-	err = (!inputFile);
 
 	// read each line of the file
-	for (int i = 0; (i < 3) && (!err); ++i)
+	for (int i = 0; (i < 3) && (inputFile); ++i)
 	{
 		inputFile >> matrix[i][0] >> matrix[i][1] >> matrix[i][2];
-		err = (!inputFile);
 	}
 
-	return (!err);
+	return !(!inputFile);
 }
 
 void MultMatrix(ConstMatrix3x3 matrix1, ConstMatrix3x3 matrix2, Matrix3x3 result)
 {
-	for (int i = 0; i<3; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
-		for (int j = 0; j<3; ++j)
+		for (int j = 0; j < 3; ++j)
 		{
-			double &pSum = result[i][j];
-			pSum = 0;
-			for (int k = 0; k<3; ++k)
+			double &resultMatrixItem = result[i][j];
+			resultMatrixItem = 0;
+			for (int k = 0; k < 3; ++k)
 			{
-				pSum += matrix1[i][k] * matrix2[k][j];
+				resultMatrixItem += matrix1[i][k] * matrix2[k][j];
 			}
 		}
 	}
@@ -42,7 +39,7 @@ void MultMatrix(ConstMatrix3x3 matrix1, ConstMatrix3x3 matrix2, Matrix3x3 result
 
 void PrintMatrix(ConstMatrix3x3 matrix)
 {
-	for (int i = 0; i<3; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		cout << matrix[i][0] << "\t" << matrix[i][1] << "\t" << matrix[i][2] << endl;
 	}

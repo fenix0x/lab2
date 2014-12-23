@@ -27,6 +27,17 @@ void PrintUsage()
 	cout << "       rle.exe unpack <input file> <output file>" << endl;
 }
 
+void WriteChunk(ofstream & file, RLEChunk & chunk)
+{
+	file.write(reinterpret_cast<char*>(&chunk), sizeof(chunk));
+}
+
+bool ReadChunk(ifstream & file, RLEChunk & chunk)
+{
+	file.read(reinterpret_cast<char*>(&chunk), sizeof(chunk));
+	return !!file;
+}
+
 ErrRle PackFile(const char* inputFilename, const char* outputFilename)
 {
 
@@ -41,7 +52,6 @@ ErrRle PackFile(const char* inputFilename, const char* outputFilename)
 	ofstream fileOut(outputFilename, ios_base::binary);
 	if (!fileOut)
 	{
-		fileOut.close();
 		return ERR_FILE_OPEN_WRITE;
 	}
 
@@ -54,30 +64,34 @@ ErrRle PackFile(const char* inputFilename, const char* outputFilename)
 		{
 			unsigned char charCount = 1;
 			char oldChar = newChar;
-			if (fileIn)
+			while (fileIn && (oldChar == (newChar = fileIn.get())) && (charCount < 255))
 			{
-				while (fileIn && (oldChar == (newChar = fileIn.get())) && (charCount < 255))
-				{
-					++charCount;
-				}
+				++charCount;
 			}
 			chunk.counter = charCount;
 			chunk.value = oldChar;
 			totalSize += sizeof(chunk);
 			if (totalSize > MAX_SIZE)
 			{
-				fileOut.close();
 				return ERR_MAX_SIZE;
 			}
 			else
 			{
-				fileOut.put(chunk.counter);
-				fileOut.put(chunk.value);
+				WriteChunk(fileOut, chunk);
 			}
 		}
 	}
 	fileOut.close();
 	return ERR_NO_ERROR;
+}
+
+void ExplodeChunk(ostream & outStream, RLEChunk const& chunk)
+{
+	char countChars = chunk.counter;
+	while (countChars--)
+	{
+		outStream.put(chunk.value);
+	}
 }
 
 ErrRle UnpackFile(const char* inputFilename, const char* outputFilename)
@@ -93,73 +107,57 @@ ErrRle UnpackFile(const char* inputFilename, const char* outputFilename)
 	ofstream fileOut(outputFilename, ios_base::binary);
 	if (!fileOut)
 	{
-		fileOut.close();
 		return ERR_FILE_OPEN_WRITE;
 	}
 
 	unsigned long totalSize = 0;
-	char readChar;
-	while ((readChar = fileIn.get()) != EOF)
+	RLEChunk chunk;
+	while (ReadChunk(fileIn, chunk))
 	{
-		unsigned char countChars = readChar;
-
-		if (countChars == 0)
+		if (chunk.counter == 0)
 		{
-			fileOut.close();
 			return ERR_FILE_CORRUPTED;
 		}
 
-		totalSize += countChars;
+		totalSize += chunk.counter;
 		if (totalSize > MAX_SIZE)
 		{
-			fileOut.close();
 			return ERR_MAX_SIZE;
 		}
 
-		char newChar;
-		if ((newChar = fileIn.get()) == EOF)
-		{
-			fileOut.close();
-			return ERR_FILE_CORRUPTED;
-		}
-
-		while (countChars--)
-		{
-			fileOut.put(newChar);
-		}
+		ExplodeChunk(fileOut, chunk);
 
 	}
-	fileOut.close();
 	return ERR_NO_ERROR;
 }
 
-void printError(int err, char* arg1, char* arg2, char* arg3)
+void PrintError(int err, char* command, char* inputFileName, char* outputFileName)
 {
 	switch (err)
 	{
 	case ERR_FILE_CORRUPTED:
-		cout << "Input file " << arg2 << " is corruped. Aborting job." << endl;
+		cout << "Input file " << inputFileName << " is corruped. Aborting job." << endl;
 		return;
 	case ERR_MAX_SIZE:
-		cout << "Output file " << arg3 << " max size reached. Aborting job." << endl;
+		cout << "Output file " << outputFileName << " max size reached. Aborting job." << endl;
 		return;
 	case ERR_NO_ERROR:
-		cout << "File " << arg2 << " " << arg1 << "ed into " << arg3 << " succesfuly." << endl;
+		cout << "File " << inputFileName << " " << command << "ed into " << outputFileName << " succesfuly." << endl;
 		return;
 	case ERR_FILE_OPEN_READ:
-		cout << "Can't open file " << arg2 << " to read." << endl;
+		cout << "Can't open file " << inputFileName << " to read." << endl;
 		return;
 	case ERR_FILE_OPEN_WRITE:
-		cout << "Can't open file " << arg3 << " to write." << endl;
+		cout << "Can't open file " << outputFileName << " to write." << endl;
 		return;
 	default:
 		return;
 	}
 }
 
-int executeCommand(const char* command, const char* inputFile, const char* outputFile)
+ErrRle ExecuteCommand(const char* command, const char* inputFile, const char* outputFile)
 {
-	int err = 0;
+	ErrRle err = ERR_NO_ERROR;
 	if (!strcmp(command, "pack"))
 	{
 		err = PackFile(inputFile, outputFile);
@@ -183,9 +181,9 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	int err = executeCommand(argv[1], argv[2], argv[3]);
+	ErrRle err = ExecuteCommand(argv[1], argv[2], argv[3]);
 
-	printError(err, argv[1], argv[2], argv[3]);
+	PrintError(err, argv[1], argv[2], argv[3]);
 
 	return err;
 }
