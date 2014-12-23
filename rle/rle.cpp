@@ -131,7 +131,7 @@ ErrRle UnpackFile(const char* inputFilename, const char* outputFilename)
 	return ERR_NO_ERROR;
 }
 
-void PrintError(int err, char* command, char* inputFileName, char* outputFileName)
+void PrintError(ErrRle err, char* command, char* inputFileName, char* outputFileName)
 {
 	switch (err)
 	{

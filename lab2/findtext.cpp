@@ -6,19 +6,19 @@ using namespace std;
 
 enum Err
 {
-	ERR_NO_ERROR,
+	ERR_TEXT_FOUND,
+	ERR_TEXT_NOT_FOUND,
 	ERR_CANT_OPEN_FILE,
 };
 
-bool FindLines(const char* filename, const char* textToSearch, Err & err)
+// try to find lines with string argv[2] in file argv[1]
+Err FindLines(const char* filename, const char* textToSearch)
 {
 	bool found = false;
 	ifstream inputFile(filename);
 	if (!inputFile)
 	{
-		cout << "File opening error" << endl;
-		err = ERR_CANT_OPEN_FILE;
-		return false;
+		return ERR_CANT_OPEN_FILE;
 	}
 	int i = 0;
 	// read each line of the file
@@ -35,7 +35,29 @@ bool FindLines(const char* filename, const char* textToSearch, Err & err)
 			found = true;
 		}
 	}
-	return found;
+	if (found)
+	{
+		return ERR_TEXT_FOUND;
+	}
+	else
+	{
+		return ERR_TEXT_NOT_FOUND;
+	}
+}
+
+void PrintError(Err err)
+{
+	switch (err)
+	{
+	case ERR_CANT_OPEN_FILE:
+		cout << "File opening error" << endl;
+		return;
+	case ERR_TEXT_NOT_FOUND:
+		cout << "Text not found." << endl;
+		return;
+	default:
+		return;
+	}
 }
 
 int main(int argc, char* argv[])
@@ -45,22 +67,7 @@ int main(int argc, char* argv[])
 		cout << "USAGE: findtext.exe <file name> <text to search>" << endl;
 		return 0;
 	}
-
-	Err err = ERR_NO_ERROR;
-
-	// try to find lines with string argv[2] in file argv[1]
-	bool found = FindLines(argv[1], argv[2], err);
-	
-	if (err == ERR_NO_ERROR)
-	{
-		if (!found)
-		{
-			cout << "Text not found." << endl;
-		}
-		return 0;
-	}
-	else
-	{
-		return err;
-	}
+	Err result = FindLines(argv[1], argv[2]);
+	PrintError(result);
+	return result;
 }
