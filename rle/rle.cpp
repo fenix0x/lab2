@@ -8,7 +8,7 @@ const unsigned long MAX_SIZE = 2UL * 1073741824UL - 1UL; // 2Gb
 
 struct RLEChunk
 {
-	char counter;
+	unsigned char counter;
 	char value;
 };
 
@@ -27,9 +27,9 @@ void PrintUsage()
 	cout << "       rle.exe unpack <input file> <output file>" << endl;
 }
 
-void WriteChunk(ofstream & file, RLEChunk & chunk)
+void WriteChunk(ofstream & file, const RLEChunk & chunk)
 {
-	file.write(reinterpret_cast<char*>(&chunk), sizeof(chunk));
+	file.write(reinterpret_cast<const char*>(&chunk), sizeof(chunk));
 }
 
 bool ReadChunk(ifstream & file, RLEChunk & chunk)
@@ -55,7 +55,6 @@ ErrRle PackFile(const char* inputFilename, const char* outputFilename)
 		return ERR_FILE_OPEN_WRITE;
 	}
 
-	RLEChunk chunk;
 	unsigned long totalSize = 0;
 	if (!fileIn.eof())
 	{
@@ -68,6 +67,7 @@ ErrRle PackFile(const char* inputFilename, const char* outputFilename)
 			{
 				++charCount;
 			}
+			RLEChunk chunk;
 			chunk.counter = charCount;
 			chunk.value = oldChar;
 			totalSize += sizeof(chunk);
